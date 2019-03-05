@@ -6,7 +6,7 @@
 /*   By: jfourne <jfourne@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/03/04 11:25:19 by jfourne           #+#    #+#             */
-/*   Updated: 2019/03/04 11:42:38 by jfourne          ###   ########.fr       */
+/*   Updated: 2019/03/04 17:55:37 by jfourne          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
 class				TreeBrowser
 {
 	public:
-		TreeBrowser(Creator &creator);
+		TreeBrowser(Creator *creator);
 		TreeBrowser(TreeBrowser const &src);
 		~TreeBrowser();
 
@@ -29,7 +29,7 @@ class				TreeBrowser
 
 	private:
 		TreeBrowser() {};
-		Creator		_creator;
+		Creator		*_creator;
 };
 
 #endif

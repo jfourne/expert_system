@@ -6,7 +6,7 @@
 /*   By: jfourne <jfourne@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/03/01 12:39:44 by jfourne           #+#    #+#             */
-/*   Updated: 2019/03/04 13:49:47 by jfourne          ###   ########.fr       */
+/*   Updated: 2019/03/04 15:38:59 by jfourne          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,13 +38,14 @@ void					Tree::create_tree(std::vector<t_tok *> &tokens)
 	Tree				*left = new Tree;
 	Tree				*right = new Tree;
 
+	if (tokens.size() == 0)
+		return ;
 	this->_type = (*it)->type;
 	this->_value = (*it)->value;
 	free(*it);
 	it = tokens.erase(tokens.begin());
 	if (it == tokens.end()
-		|| ((this->_type == VAL || this->_type == NOT_VAL)
-			&& ((*it)->type == VAL  || (*it)->type == NOT_VAL)))
+		|| (this->_type == VAL || this->_type == NOT_VAL))
 	{
 		delete (left);
 		delete (right);

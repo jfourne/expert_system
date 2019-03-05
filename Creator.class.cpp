@@ -6,7 +6,7 @@
 /*   By: jfourne <jfourne@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/03/01 10:44:53 by jfourne           #+#    #+#             */
-/*   Updated: 2019/03/04 13:54:38 by jfourne          ###   ########.fr       */
+/*   Updated: 2019/03/05 10:25:22 by jfourne          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,17 +28,17 @@ void			Creator::free_tree(Tree *tree)
 
 Creator::~Creator()
 {
-	std::vector<t_tok *>::iterator		it = this->_tokens.begin();
-	std::map<char, Tree *>::iterator	itt = this->_rules.begin();
+	// std::vector<t_tok *>::iterator		it = this->_tokens.begin();
+	std::multimap<char, Tree *>::iterator	itt = this->_rules.begin();
 
 	this->_facts.clear();
 	this->_queries.clear();
 	this->_equal_rules.clear();
-	while (it != this->_tokens.end())
-	{
-		free(*it);
-		it++;
-	}
+	// while (it != this->_tokens.end())
+	// {
+	// 	free(*it);
+	// 	it++;
+	// }
 	this->_tokens.clear();
 	while (itt != this->_rules.end())
 	{
@@ -56,6 +56,11 @@ Creator::Creator(Creator const &src)
 Creator&				Creator::operator=(Creator const &rhs)
 {
 	this->_facts = rhs._facts;
+	this->_queries = rhs._queries;
+	this->_tokens = rhs._tokens;
+	this->_equal_rules = rhs._equal_rules;
+	// COPIER TOUS LES NEXT DES RULES
+	this->_rules = rhs._rules;
 	return (*this);
 }
 
@@ -82,22 +87,27 @@ int						Creator::create_rule(char res, std::vector<t_tok *> &tokens)
 	Tree				*new_rule = new Tree;
 
 	new_rule->create_tree(tokens);
+	std::cout << res << " = ";
 	new_rule->print(0);
 	this->_rules.insert(this->_rules.end(), std::pair<char, Tree *>(res, new_rule));
 	return (EXIT_SUCCESS);
 }
 
-std::map<char, Tree *>::iterator		Creator::try_rules(char &query)
+bool									Creator::check_rules(char &query)
 {
-	std::map<char, Tree *>::iterator	itr = this->_rules.begin();
+	bool								ret = false;
+	TreeBrowser							browser(this);
+	std::multimap<char, Tree *>::iterator	itr = this->_rules.begin();
 
 	while (itr != this->_rules.end())
 	{
 		if (itr->first == query)
-			return itr;
+			ret = browser.browse_tree(itr->second);
+		if (ret == true)
+			return (ret);
 		itr++;
 	}
-	return (itr);
+	return (ret);
 }
 
 void					Creator::create_equal_rule(char res, char equal)
@@ -107,7 +117,7 @@ void					Creator::create_equal_rule(char res, char equal)
 
 char					Creator::check_equal_rule(char &query)
 {
-	std::map<char, char>::iterator		it = this->_equal_rules.begin();
+	std::multimap<char, char>::iterator		it = this->_equal_rules.begin();
 
 	while (it != this->_equal_rules.end())
 	{
@@ -116,17 +126,6 @@ char					Creator::check_equal_rule(char &query)
 		it++;
 	}
 	return (-1);
-}
-
-bool					Creator::check_rules(char &query)
-{
-	TreeBrowser			browser(*this);
-	std::map<char, Tree *>::iterator	itr;
-
-	if ((itr = this->try_rules(query)) == this->_rules.end())
-		return (false);
-	else
-		return (browser.browse_tree(itr->second) == true);
 }
 
 bool					Creator::check_all(char &query)
@@ -155,7 +154,7 @@ void					Creator::execute(void)
 	query = *(this->_queries.begin());
 	if (check_all(query) == true)
 	{
-		// ADD QUERY TO FACT ?
+		// CHECK ADD TO FACT ?
 		// this->add_fact(query);
 		std::cout << query << " : is true" << std::endl;
 	}

@@ -6,13 +6,13 @@
 /*   By: jfourne <jfourne@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/03/04 11:28:37 by jfourne           #+#    #+#             */
-/*   Updated: 2019/03/04 12:19:12 by jfourne          ###   ########.fr       */
+/*   Updated: 2019/03/04 17:56:26 by jfourne          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "TreeBrowser.class.hpp"
 
-TreeBrowser::TreeBrowser(Creator &creator): _creator(creator)
+TreeBrowser::TreeBrowser(Creator *creator): _creator(creator)
 {
 }
 
@@ -52,14 +52,14 @@ bool			check_xor(bool left, bool right)
 	return (false);
 }
 
-bool			check_val(Creator &creator, char value)
+bool			check_val(Creator *creator, char value)
 {
-	return (creator.check_all(value));
+	return (creator->check_all(value));
 }
 
-bool			check_not_val(Creator &creator, char value)
+bool			check_not_val(Creator *creator, char value)
 {
-	return (!(creator.check_all(value)));
+	return (!(creator->check_all(value)));
 }
 
 bool			TreeBrowser::check_conditions(bool left, bool right, Tree *tree)
