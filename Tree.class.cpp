@@ -6,7 +6,7 @@
 /*   By: jfourne <jfourne@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/03/01 12:39:44 by jfourne           #+#    #+#             */
-/*   Updated: 2019/03/04 15:38:59 by jfourne          ###   ########.fr       */
+/*   Updated: 2019/03/07 11:08:15 by jfourne          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,22 +29,20 @@ Tree&					Tree::operator=(Tree const &rhs)
 {
 	this->_left = rhs._left;
 	this->_right = rhs._right;
+	this->_type = rhs._type;
+	this->_value = rhs._value;
 	return *this;
 }
 
-void					Tree::create_tree(std::vector<t_tok *> &tokens)
+void					Tree::create_tree(std::vector<t_tok *> &tokens,
+									std::vector<t_tok *>::iterator &it)
 {
-	std::vector<t_tok *>::iterator	it = tokens.begin();
 	Tree				*left = new Tree;
 	Tree				*right = new Tree;
 
-	if (tokens.size() == 0)
-		return ;
 	this->_type = (*it)->type;
 	this->_value = (*it)->value;
-	free(*it);
-	it = tokens.erase(tokens.begin());
-	if (it == tokens.end()
+	if (it + 1 == tokens.end()
 		|| (this->_type == VAL || this->_type == NOT_VAL))
 	{
 		delete (left);
@@ -54,9 +52,11 @@ void					Tree::create_tree(std::vector<t_tok *> &tokens)
 		return ;
 	}
 	this->_left = left;
-	left->create_tree(tokens);
+	it++;
+	left->create_tree(tokens, it);
+	it++;
 	this->_right = right;
-	right->create_tree(tokens);
+	right->create_tree(tokens, it);
 }
 
 void				Tree::print(int i)

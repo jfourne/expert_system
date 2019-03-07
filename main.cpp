@@ -6,13 +6,13 @@
 /*   By: jfourne <jfourne@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/03/01 10:00:11 by jfourne           #+#    #+#             */
-/*   Updated: 2019/03/04 13:57:57 by jfourne          ###   ########.fr       */
+/*   Updated: 2019/03/07 10:03:50 by jfourne          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <unistd.h>
 #include <iostream>
-#include "LexerParser.class.hpp"
+#include "Parser.class.hpp"
 
 int			main(int ac, char **av)
 {
@@ -22,7 +22,14 @@ int			main(int ac, char **av)
 		return (EXIT_FAILURE);
 	}
 
-	LexerParser		lp;
-	lp.open_file(av[1]);
+	try
+	{
+		Parser		parser(av[1]);
+		parser.open_file();
+	}
+	catch (std::exception &e)
+	{
+		std::cerr << e.what() << std::endl;
+	}
 	return (EXIT_SUCCESS);
 }

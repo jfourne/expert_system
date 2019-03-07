@@ -6,7 +6,7 @@
 /*   By: jfourne <jfourne@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/03/01 10:44:53 by jfourne           #+#    #+#             */
-/*   Updated: 2019/03/05 10:25:22 by jfourne          ###   ########.fr       */
+/*   Updated: 2019/03/07 10:54:34 by jfourne          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,18 +28,11 @@ void			Creator::free_tree(Tree *tree)
 
 Creator::~Creator()
 {
-	// std::vector<t_tok *>::iterator		it = this->_tokens.begin();
 	std::multimap<char, Tree *>::iterator	itt = this->_rules.begin();
 
 	this->_facts.clear();
 	this->_queries.clear();
 	this->_equal_rules.clear();
-	// while (it != this->_tokens.end())
-	// {
-	// 	free(*it);
-	// 	it++;
-	// }
-	this->_tokens.clear();
 	while (itt != this->_rules.end())
 	{
 		free_tree(itt->second);
@@ -57,12 +50,12 @@ Creator&				Creator::operator=(Creator const &rhs)
 {
 	this->_facts = rhs._facts;
 	this->_queries = rhs._queries;
-	this->_tokens = rhs._tokens;
 	this->_equal_rules = rhs._equal_rules;
-	// COPIER TOUS LES NEXT DES RULES
 	this->_rules = rhs._rules;
 	return (*this);
 }
+
+// Add fact to list and check if it doesn't already exist
 
 void					Creator::add_fact(char fact)
 {
@@ -77,21 +70,28 @@ void					Creator::add_fact(char fact)
 	this->_facts.push_back(fact);
 }
 
+// Add query to list
+
 void					Creator::add_query(char query)
 {
 	this->_queries.push_back(query);
 }
 
+// Create rule from tokens
+
 int						Creator::create_rule(char res, std::vector<t_tok *> &tokens)
 {
-	Tree				*new_rule = new Tree;
+	Tree							*new_rule = new Tree;
+	std::vector<t_tok *>::iterator	it = tokens.begin();
 
-	new_rule->create_tree(tokens);
+	new_rule->create_tree(tokens, it);
 	std::cout << res << " = ";
 	new_rule->print(0);
 	this->_rules.insert(this->_rules.end(), std::pair<char, Tree *>(res, new_rule));
 	return (EXIT_SUCCESS);
 }
+
+// Check rule list in execution
 
 bool									Creator::check_rules(char &query)
 {
@@ -110,39 +110,70 @@ bool									Creator::check_rules(char &query)
 	return (ret);
 }
 
+// Create equality list
+
 void					Creator::create_equal_rule(char res, char equal)
 {
+	std::cout << res << " = " << equal << std::endl << std::endl;
 	this->_equal_rules.insert(this->_equal_rules.end(), std::pair<char, char>(res, equal));
 }
 
+// Check equal list in execution
+
 char					Creator::check_equal_rule(char &query)
 {
+	bool									ret = false;
 	std::multimap<char, char>::iterator		it = this->_equal_rules.begin();
 
 	while (it != this->_equal_rules.end())
 	{
 		if (it->first == query)
-			return (it->second);
+		{
+			if (check_all(it->second) == true)
+			{
+				std::cout << query << " : is true because " << it->second << " is true" << std::endl;
+				ret = true;
+			}
+		}
 		it++;
 	}
-	return (-1);
+	return (ret);
 }
+
+// Check all list of rules and fact to see if the query is true
 
 bool					Creator::check_all(char &query)
 {
 	char				equal;
+	bool				ret = false;
 	std::vector<char>::iterator it = this->_facts.begin();
 
 	while (it != this->_facts.end())
 	{
 		if (query == *it)
+		{
+			std::cout << query << " : is true" << std::endl;
 			return (true);
+		}
 		it++;
 	}
-	if ((equal = this->check_equal_rule(query)) != -1)
-		return (check_all(equal));
+	if ((equal = this->check_equal_rule(query)) == true)
+	{
+		this->add_fact(query);
+		return (true);
+	}
 	else
-		return (this->check_rules(query));
+	{
+		ret = this->check_rules(query);
+		if (ret == true)
+		{
+			this->add_fact(query);
+			std::cout << query << " : is true because the rule validate it" << std::endl;
+		}
+		else
+			std::cout << query << " : is false because no rule validate it" << std::endl;
+		return (ret);
+	}
 }
 
 void					Creator::execute(void)
@@ -152,14 +183,15 @@ void					Creator::execute(void)
 	if (this->_queries.size() == 0)
 		return ;
 	query = *(this->_queries.begin());
-	if (check_all(query) == true)
-	{
-		// CHECK ADD TO FACT ?
-		// this->add_fact(query);
-		std::cout << query << " : is true" << std::endl;
-	}
-	else
-		std::cout << query << " : is false" << std::endl;
+	check_all(query);
+	// if (check_all(query) == true)
+	// {
+	// 	CHECK ADD TO FACT ?
+	// 	this->add_fact(query);
+	// 	std::cout << query << " : is true" << std::endl;
+	// }
+	// else
+	// 	std::cout << query << " : is false" << std::endl;
 	this->_queries.erase(this->_queries.begin());
 	this->execute();
 }

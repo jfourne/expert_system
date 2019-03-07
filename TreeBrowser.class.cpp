@@ -6,7 +6,7 @@
 /*   By: jfourne <jfourne@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/03/04 11:28:37 by jfourne           #+#    #+#             */
-/*   Updated: 2019/03/04 17:56:26 by jfourne          ###   ########.fr       */
+/*   Updated: 2019/03/07 10:08:45 by jfourne          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,9 +47,15 @@ bool			check_or(bool left, bool right)
 
 bool			check_xor(bool left, bool right)
 {
+	bool		ret = false;
+
 	if (left && !right)
-		return (true);
-	return (false);
+		ret = true;
+	else if (right && !left)
+		ret = true;
+	else
+		ret = false;
+	return (ret);
 }
 
 bool			check_val(Creator *creator, char value)
@@ -89,6 +95,6 @@ bool			TreeBrowser::browse_tree(Tree *tree)
 		left = this->browse_tree(tree->_left);
 	if (tree->_right)
 		right = this->browse_tree(tree->_right);
-	std::cout << "left  : " << left << " right : " << right << " value : " << tree->_value << std::endl;
+	// std::cout << "left  : " << left << " right : " << right << " value : " << tree->_value << std::endl;
 	return (this->check_conditions(left, right, tree));
 }

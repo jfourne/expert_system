@@ -6,7 +6,7 @@
 /*   By: jfourne <jfourne@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/03/01 10:43:37 by jfourne           #+#    #+#             */
-/*   Updated: 2019/03/05 10:23:16 by jfourne          ###   ########.fr       */
+/*   Updated: 2019/03/07 10:49:37 by jfourne          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,13 +33,11 @@ class 				Creator
 		bool			check_rules(char &query);
 		bool			check_all(char &query);
 		void			execute(void);
-		// std::multimap<char, Tree *>::iterator	try_rules(char &query);
 
 	private:
 		Tree						_tree;
 		std::vector<char>			_facts;
 		std::vector<char>			_queries;
-		std::vector<t_tok *>		_tokens;
 		std::multimap<char, char>	_equal_rules;
 		std::multimap<char, Tree *>	_rules;
 };
