@@ -6,7 +6,7 @@
 /*   By: jfourne <jfourne@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/03/05 11:24:12 by jfourne           #+#    #+#             */
-/*   Updated: 2019/03/07 11:07:43 by jfourne          ###   ########.fr       */
+/*   Updated: 2019/03/11 11:10:49 by jfourne          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -180,9 +180,9 @@ void					Parser::parse_pre_equal(std::string line)
 		line.erase(found, line.size());
 	line.erase(std::remove(line.begin(), line.end(), '('), line.end());
 	line.erase(std::remove(line.begin(), line.end(), ')'), line.end());
-	if (line.size() == 1)
+	if (line.size() == 1 || (line.size() == 2 && line[0] == '!'))
 	{
-		if (std::regex_match(line, std::regex("^[A-Z]$")))
+		if (std::regex_match(line, std::regex("^!?[A-Z]$")))
 			return ;
 		this->add_error("can't have only operator in the rule");
 		return ;
@@ -196,16 +196,16 @@ void					Parser::parse_post_equal(std::string line)
 {
 	size_t				found;
 	std::string			result_op = "=>";
-	std::regex			check_rule("^([A-Z]\\+)+[A-Z]$");
+	std::regex			check_rule("^(!?[A-Z]\\+)+!?[A-Z]$");
 
 	found = line.find("=>");
 	if (found != std::string::npos)
 		line.erase(0, found + result_op.size());
 	line.erase(std::remove(line.begin(), line.end(), '('), line.end());
 	line.erase(std::remove(line.begin(), line.end(), ')'), line.end());
-	if (line.size() == 1)
+	if (line.size() == 1 || line.size() == 2)
 	{
-		if (std::regex_match(line, std::regex("^[A-Z]$")))
+		if (std::regex_match(line, std::regex("^!?[A-Z]$")))
 			return ;
 		this->add_error("can't have only operator in the result");
 		return ;
@@ -286,7 +286,11 @@ int						Parser::open_file(void)
 			this->parse_line(line);
 		this->found_all_line_type();
 		if (this->_error_list.size() > 0)
+		{
+			ifs.close();
 			return (this->print_error());
+		}
 	}
+	ifs.close();
 	return (this->start_prog());
 }

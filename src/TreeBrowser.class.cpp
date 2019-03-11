@@ -6,7 +6,7 @@
 /*   By: jfourne <jfourne@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/03/04 11:28:37 by jfourne           #+#    #+#             */
-/*   Updated: 2019/03/07 10:08:45 by jfourne          ###   ########.fr       */
+/*   Updated: 2019/03/11 16:07:17 by jfourne          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,6 +70,7 @@ bool			check_not_val(Creator *creator, char value)
 
 bool			TreeBrowser::check_conditions(bool left, bool right, Tree *tree)
 {
+	bool		ret = false;
 	static bool		(*ptr_func[])(bool, bool) = {
 		&check_and,
 		&check_or,
@@ -77,7 +78,13 @@ bool			TreeBrowser::check_conditions(bool left, bool right, Tree *tree)
 	};
 
 	if (tree->_type < VAL)
-		return (ptr_func[tree->_type](left, right));
+	{
+		ret = ptr_func[tree->_type](left, right);
+		std::cout << "  With operator : '" << tree->_value << "'";
+		// if (tree->_type == AND && ret == false)
+		// 	this->_creator->false_and = true;
+		return (ret);
+	}
 	else if (tree->_type == VAL)
 		return (check_val(this->_creator, tree->_value));
 	else if (tree->_type == NOT_VAL)

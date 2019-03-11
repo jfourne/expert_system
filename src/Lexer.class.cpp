@@ -6,7 +6,7 @@
 /*   By: jfourne <jfourne@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/03/01 10:06:20 by jfourne           #+#    #+#             */
-/*   Updated: 2019/03/07 10:58:38 by jfourne          ###   ########.fr       */
+/*   Updated: 2019/03/11 16:54:10 by jfourne          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,23 +64,44 @@ int						Lexer::create_tok(tok_type type, char value)
 	return (EXIT_SUCCESS);
 }
 
+t_tok*					Lexer::create_tokens(tok_type type, char value)
+{
+	t_tok				*tok;
+
+	if ((tok = (t_tok *) malloc(sizeof (t_tok))) == NULL)
+		return (NULL);
+	tok->type = type;
+	tok->value = value;
+	return (tok);
+}
+
 // Truncate line to only get the result part
 
-std::vector<char>		Lexer::get_result(std::string line)
+t_tok*						Lexer::push_result(std::string &line)
 {
-	size_t				found;
-	std::string			result_op = "=>";
-	std::vector<char>	result;
+	if (line[0] == '!')
+		return (this->create_tokens(NOT_VAL, line[1]));
+	else
+		return (this->create_tokens(VAL, line[0]));
+}
+
+std::vector<t_tok *>		Lexer::get_result(std::string line)
+{
+	size_t					found;
+	std::string				result_op = "=>";
+	std::vector<t_tok *>	result;
 
 	found = line.find(result_op);
 	if (found != std::string::npos)
 		line.erase(0, found + result_op.size());
 	while ((found = line.find("+") != std::string::npos))
 	{
-		result.push_back(line[0]);
+		result.push_back(this->push_result(line));
+		if (line[0] == '!')
+			found++;
 		line.erase(0, found + 1);
 	}
-	result.push_back(line[0]);
+	result.push_back(this->push_result(line));
 	return (result);
 }
 
@@ -209,10 +230,74 @@ bool					Lexer::check_result_in_token(char result)
 	return (false);
 }
 
+// Begin is the result and others are all symbols found in the rule
+
+void					Lexer::add_rule_symbols(char result)
+{
+	std::vector<char>	symbol;
+	std::vector<t_tok *>::iterator it = this->_tokens.begin();
+
+	symbol.push_back(result);
+	while (it != this->_tokens.end())
+	{
+		if ((*it)->type == VAL || (*it)->type == NOT_VAL)
+			symbol.push_back((*it)->value);
+		it++;
+	}
+	this->_symbols.push_back(symbol);
+}
+
+// Check if a symbol that lead to result already has result in his symbol rule
+
+bool					Lexer::check_infinite_loop_result_symbol(char result,
+							std::vector<char>::iterator its)
+{
+	std::vector<std::vector<char> >::iterator	it = this->_symbols.begin();
+
+	while (it != this->_symbols.end())
+	{
+		std::vector<char>::iterator	itloop = (*it).begin();
+		if (itloop != (*it).end() && *itloop == *its)
+		{
+			itloop++;
+			while (itloop != (*it).end())
+			{
+				if (*itloop == result)
+					return (true);
+				itloop++;
+			}
+		}
+		it++;
+	}
+	return (false);
+}
+
+bool					Lexer::check_rule_symbols(char result)
+{
+	std::vector<std::vector<char> >::iterator	it = this->_symbols.begin();
+
+	while (it != this->_symbols.end())
+	{
+		std::vector<char>::iterator	its = (*it).begin();
+		if (its != (*it).end() && *its == result)
+		{
+			its++;
+			while (its != (*it).end())
+			{
+				if (check_infinite_loop_result_symbol(result, its) == true)
+					return (true);
+				its++;
+			}
+		}
+		it++;
+	}
+	return (false);
+}
+
 bool					Lexer::tokenize_line(std::string &line)
 {
-	size_t				found;
-	std::vector<char>	result;
+	size_t					found;
+	std::vector<t_tok *>	result;
 
 	result = this->get_result(line);
 	found = line.find("=>");
@@ -221,17 +306,31 @@ bool					Lexer::tokenize_line(std::string &line)
 	if (this->get_tokens(line) == EXIT_FAILURE)
 		return (false);
 
-	std::vector<char>::iterator	it = result.begin();
+	std::vector<t_tok *>::iterator	it = result.begin();
 	while (it != result.end())
 	{
-		if (this->check_result_in_token(*it) == true)
+		if (*it == NULL)
 		{
-			std::cerr << "Result can't be in rule too" << std::endl;
 			this->free_tokens();
 			return (false);
 		}
-		if (this->_tokens.size() == 1)
-			this->_creator.create_equal_rule(*it, (*(this->_tokens.begin()))->value);
+		this->add_rule_symbols((*it)->value);
+		if (this->check_result_in_token((*it)->value) == true)
+		{
+			std::cerr << "Result " << (*it)->value << " : can't be in rule too" << std::endl;
+			this->free_tokens();
+			return (false);
+		}
+		if (this->check_rule_symbols((*it)->value) == true)
+		{
+			std::cerr << "Result " << (*it)->value << " : is in another rule wich lead to infinite loop" << std::endl;
+			this->free_tokens();
+			return (false);
+		}
+		if (this->_tokens.size() == 1 && (*(this->_tokens.begin()))->type == VAL)
+			this->_creator.create_equal_rule(*it, (*(this->_tokens.begin()))->value, true);
+		else if (this->_tokens.size() == 1 && (*(this->_tokens.begin()))->type == NOT_VAL)
+			this->_creator.create_equal_rule(*it, (*(this->_tokens.begin()))->value, false);
 		else
 			this->_creator.create_rule(*it, this->_tokens);
 		it++;
@@ -279,6 +378,6 @@ int						Lexer::resolve_it(void)
 		}
 		it++;
 	}
-	this->_creator.execute();
+	this->_creator.start_execute();
 	return (EXIT_SUCCESS);
 }

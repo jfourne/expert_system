@@ -6,7 +6,7 @@
 /*   By: jfourne <jfourne@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/03/01 12:39:44 by jfourne           #+#    #+#             */
-/*   Updated: 2019/03/07 11:08:15 by jfourne          ###   ########.fr       */
+/*   Updated: 2019/03/11 11:14:48 by jfourne          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,6 +63,7 @@ void				Tree::print(int i)
 {
 	int				j = 0;
 
+	this->_type == NOT_VAL ? std::cout << "!" : std::cout ;
 	std::cout << this->_value << std::endl;
 	while (j < i)
 	{
