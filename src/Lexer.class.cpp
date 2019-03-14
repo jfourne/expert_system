@@ -6,7 +6,7 @@
 /*   By: jfourne <jfourne@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/03/01 10:06:20 by jfourne           #+#    #+#             */
-/*   Updated: 2019/03/11 16:54:10 by jfourne          ###   ########.fr       */
+/*   Updated: 2019/03/13 11:40:07 by jfourne          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,10 +46,25 @@ void					Lexer::free_tokens(void)
 
 	while (it != this->_tokens.end())
 	{
-		free(*it);
+		if (*it)
+			free(*it);
 		it++;
 	}
 	this->_tokens.clear();
+}
+
+bool					Lexer::free_result(std::vector<t_tok *> &result)
+{
+	std::vector<t_tok *>::iterator		it = result.begin();
+
+	while (it != result.end())
+	{
+		if (*it)
+			free(*it);
+		it++;		
+	}
+	result.clear();
+	return (false);
 }
 
 int						Lexer::create_tok(tok_type type, char value)
@@ -87,6 +102,7 @@ t_tok*						Lexer::push_result(std::string &line)
 
 std::vector<t_tok *>		Lexer::get_result(std::string line)
 {
+	t_tok					*res;
 	size_t					found;
 	std::string				result_op = "=>";
 	std::vector<t_tok *>	result;
@@ -94,14 +110,29 @@ std::vector<t_tok *>		Lexer::get_result(std::string line)
 	found = line.find(result_op);
 	if (found != std::string::npos)
 		line.erase(0, found + result_op.size());
+	else
+	{
+		std::cerr << "The operator '=>' couldn't be found" << std::endl;
+		return (result);
+	}
 	while ((found = line.find("+") != std::string::npos))
 	{
-		result.push_back(this->push_result(line));
+		if ((res = this->push_result(line)) == NULL)
+		{
+			this->free_result(result);
+			return (result);
+		}
+		result.push_back(res);
 		if (line[0] == '!')
 			found++;
 		line.erase(0, found + 1);
 	}
-	result.push_back(this->push_result(line));
+	if ((res = this->push_result(line)) == NULL)
+	{
+		this->free_result(result);
+		return (result);
+	}
+	result.push_back(res);
 	return (result);
 }
 
@@ -111,37 +142,53 @@ int						Lexer::get_tokens(std::string line)
 
 	if (line.size() == 0)
 		return (EXIT_SUCCESS);
-	if (line[0] == '(')
-		check_bracket(line);
-	else
+	// if (line[0] == '(')
+	// {
+	// 	if (check_bracket(line) == EXIT_FAILURE)
+	// 		return (EXIT_FAILURE);
+	// }
+	// else
+	// {
+	if ((i = check_op(line, 0)) == -2)
+		return (EXIT_FAILURE);
+	if (i == -1 && line[0] == '(')
 	{
-		if ((i = check_op(line, 0)) == -2)
+		if (this->check_bracket(line) == EXIT_FAILURE)
 			return (EXIT_FAILURE);
+	}
+	else if (i == -1)
+	{
 		if (check_val(line, i) == EXIT_FAILURE)
 			return (EXIT_FAILURE);
 	}
-	get_tokens(line);
+	// }
+	if (get_tokens(line) == EXIT_FAILURE)
+		return (EXIT_FAILURE);
 	return (EXIT_SUCCESS);
 }
 
 // Remove bracket and tokenize what is inside it
 
-void					Lexer::reduce_bracket(std::string &line, int i)
+int						Lexer::reduce_bracket(std::string &line, int i)
 {
 	std::string			inside_bracket;
 
-	i = this->check_op(line, i);
-	if (i > -1)
-	{
-		inside_bracket = line.substr(1, i - 2);
+	// if ((i = this->op_to_tokens(line, i)) == -2)
+	// 	return (EXIT_FAILURE);
+	// if (i > -1)
+	// {
+		inside_bracket = line.substr(1, i - 1);
 		line.erase(0, i + 1);
-	}
-	else
-	{
-		inside_bracket = line.substr(1, line.size() + 1);
-		line.clear();
-	}
-	this->get_tokens(inside_bracket);
+	// 	std::cout << line << std::endl;
+	// }
+	// else
+	// {
+	// 	inside_bracket = line.substr(1, line.size() + 1);
+	// 	line.clear();
+	// }
+	if (this->get_tokens(inside_bracket) == EXIT_FAILURE)
+		return (EXIT_FAILURE);
+	return (EXIT_SUCCESS);
 }
 
 // Check if there is bracket
@@ -159,45 +206,101 @@ int						Lexer::check_bracket(std::string &line)
 			bracket--;
 		if (bracket == 0)
 		{
-			this->reduce_bracket(line, i);
-			return (0);
+			if (this->reduce_bracket(line, i) == EXIT_FAILURE)
+				return (EXIT_FAILURE);
+			return (EXIT_SUCCESS);
 		}
 		i++;
 	}
-	return (0);
+	return (EXIT_SUCCESS);
 }
 
 // Browse the operator list to see if there is one
 
-int						Lexer::check_op(std::string line, int i)
-{
-	std::map<tok_type, char>::iterator	it;
+// int						Lexer::op_to_tokens(std::string line, int i)
+// {
+// 	std::map<tok_type, char>::iterator	it;
 
-	while (static_cast<size_t>(i) < line.size())
+// 	while (static_cast<size_t>(i) < line.size())
+// 	{
+// 		it = this->_op.begin();
+// 		while (it != this->_op.end())
+// 		{
+// 			if (it->second == line[i])
+// 			{
+// 				if (this->create_tok(it->first, it->second) == EXIT_FAILURE)
+// 					return (-2);
+// 				return (i);
+// 			}
+// 			it++;
+// 		}
+// 		i++;
+// 	}
+// 	return (-1);
+// }
+
+int						Lexer::search_op(std::string line, char op)
+{
+	int					bracket = 0;
+	int					i = 0;
+
+	while (static_cast<size_t>(i) < line.size() && line[i] != op)
 	{
-		it = this->_op.begin();
-		while (it != this->_op.end())
+		if (line[i] == '(')
 		{
-			if (it->second == line[i])
+			bracket++;
+			i++;
+			while (static_cast<size_t>(i) < line.size() && bracket != 0)
 			{
-				if (this->create_tok(it->first, it->second) == EXIT_FAILURE)
-				{
-					this->free_tokens();
-					return (-2);
-				}
-				return (i);
+				if (line[i] == '(')
+					bracket++;
+				if (line[i] == ')')
+					bracket--;
+				i++;
 			}
-			it++;
 		}
-		i++;
+		else
+			i++;
 	}
-	return (-1);
+	if (static_cast<size_t>(i) == line.size())
+		return (-1);
+	return (i);
+}
+
+int						Lexer::check_op(std::string &line, int i)
+{
+	std::string			new_line;
+
+	if ((i = this->search_op(line, '^')) != -1)
+	{
+		if (this->create_tok(XOR, '^') == EXIT_FAILURE)
+			return (-2);
+	}
+	else if ((i = this->search_op(line, '|')) != -1)
+	{
+		if (this->create_tok(OR, '|') == EXIT_FAILURE)
+			return (-2);
+	}
+	else if ((i = this->search_op(line, '+')) != -1)
+	{
+		if (this->create_tok(AND, '+') == EXIT_FAILURE)
+			return (-2);
+	}
+	if (i > -1)
+	{
+		new_line = line.substr(0, i);
+		if (this->get_tokens(new_line) == EXIT_FAILURE)
+			return (-2);
+		line.erase(0, i + 1);
+	}
+	return (i);
 }
 
 // Add the value or "not value" to tokens
 
 int						Lexer::check_val(std::string &line, int &i)
 {
+	(void)i;
 	if (line[0] == '!')
 	{
 		if (this->create_tok(NOT_VAL, line[1]) == EXIT_FAILURE)
@@ -208,10 +311,10 @@ int						Lexer::check_val(std::string &line, int &i)
 		if (this->create_tok(VAL, line[0]) == EXIT_FAILURE)
 			return (EXIT_FAILURE);
 	}
-	if (i > -1)
-		line.erase(0, i + 1);
-	else
-		line.clear();
+	// if (i > -1)
+	// 	line.erase(0, i + 1);
+	// else
+	line.clear();
 	return (EXIT_SUCCESS);
 }
 
@@ -300,32 +403,43 @@ bool					Lexer::tokenize_line(std::string &line)
 	std::vector<t_tok *>	result;
 
 	result = this->get_result(line);
+	if (result.empty())
+		return (false);
 	found = line.find("=>");
 	if (found != std::string::npos)
 		line.erase(found, line.size());
 	if (this->get_tokens(line) == EXIT_FAILURE)
-		return (false);
+		return (this->free_result(result));
+
+	// std::vector<t_tok *>::iterator	itt = this->_tokens.begin();
+	// while (itt != this->_tokens.end())
+	// {
+	// 	std::cout << (*itt)->value << " ";
+	// 	itt++;
+	// }
+	// std::cout << std::endl;
+	// exit(0);
 
 	std::vector<t_tok *>::iterator	it = result.begin();
 	while (it != result.end())
 	{
 		if (*it == NULL)
 		{
-			this->free_tokens();
-			return (false);
+			// this->free_tokens();
+			return (this->free_result(result));
 		}
 		this->add_rule_symbols((*it)->value);
 		if (this->check_result_in_token((*it)->value) == true)
 		{
 			std::cerr << "Result " << (*it)->value << " : can't be in rule too" << std::endl;
-			this->free_tokens();
-			return (false);
+			// this->free_tokens();
+			return (this->free_result(result));
 		}
 		if (this->check_rule_symbols((*it)->value) == true)
 		{
 			std::cerr << "Result " << (*it)->value << " : is in another rule wich lead to infinite loop" << std::endl;
-			this->free_tokens();
-			return (false);
+			// this->free_tokens();
+			return (this->free_result(result));
 		}
 		if (this->_tokens.size() == 1 && (*(this->_tokens.begin()))->type == VAL)
 			this->_creator.create_equal_rule(*it, (*(this->_tokens.begin()))->value, true);
@@ -335,7 +449,7 @@ bool					Lexer::tokenize_line(std::string &line)
 			this->_creator.create_rule(*it, this->_tokens);
 		it++;
 	}
-	this->free_tokens();
+	// this->free_tokens();
 	return (true);
 }
 
@@ -374,8 +488,12 @@ int						Lexer::resolve_it(void)
 		else
 		{
 			if (this->tokenize_line(*it) == false)
+			{
+				this->free_tokens();
 				return (EXIT_FAILURE);
+			}
 		}
+		this->free_tokens();
 		it++;
 	}
 	this->_creator.start_execute();

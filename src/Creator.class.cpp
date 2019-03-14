@@ -6,7 +6,7 @@
 /*   By: jfourne <jfourne@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/03/01 10:44:53 by jfourne           #+#    #+#             */
-/*   Updated: 2019/03/11 16:51:27 by jfourne          ###   ########.fr       */
+/*   Updated: 2019/03/12 13:55:20 by jfourne          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -168,6 +168,7 @@ char					Creator::check_equal_rule(char &query)
 				ret = true;
 				if (it->first->type == NOT_VAL)
 					ret = false;
+				return (ret);
 			}
 			else if ((it->second)->type == VAL && check_all((it->second)->value) == true)
 			{
@@ -175,6 +176,7 @@ char					Creator::check_equal_rule(char &query)
 				ret = true;
 				if (it->first->type == NOT_VAL)
 					ret = false;
+				return (ret);
 			}
 		}
 		it++;

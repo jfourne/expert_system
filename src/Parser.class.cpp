@@ -6,7 +6,7 @@
 /*   By: jfourne <jfourne@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/03/05 11:24:12 by jfourne           #+#    #+#             */
-/*   Updated: 2019/03/11 11:10:49 by jfourne          ###   ########.fr       */
+/*   Updated: 2019/03/13 11:39:52 by jfourne          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -159,6 +159,11 @@ void					Parser::parse_bracket(std::string &line)
 			if (count == 0)
 				inside_bracket = false;
 			this->parse_close_bracket(line, i);
+		}
+		if (count < 0)
+		{
+			this->add_error("closing bracket before an opening one");
+			return ;
 		}
 		if (inside_bracket == true)
 			parse_inside_bracket(line[i], found_sign);

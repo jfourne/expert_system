@@ -6,7 +6,7 @@
 /*   By: jfourne <jfourne@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/03/01 10:05:27 by jfourne           #+#    #+#             */
-/*   Updated: 2019/03/11 10:20:42 by jfourne          ###   ########.fr       */
+/*   Updated: 2019/03/13 10:47:47 by jfourne          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,15 +26,17 @@ class Lexer
 		Lexer			&operator=(Lexer const &rhs);
 
 		void				free_tokens(void);
+		bool				free_result(std::vector<t_tok *> &result);
 		int					resolve_it(void);
 		t_tok*				push_result(std::string &line);
 		int					create_tok(tok_type type, char value);
 		t_tok*				create_tokens(tok_type type, char value);
 		std::vector<t_tok *>	get_result(std::string line);
 		int					get_tokens(std::string line);
-		void				reduce_bracket(std::string &line, int i);
+		int					reduce_bracket(std::string &line, int i);
 		int					check_bracket(std::string &line);
-		int					check_op(std::string line, int i);
+		int					search_op(std::string line, char op);
+		int					check_op(std::string &line, int i);
 		int					check_val(std::string &line, int &i);
 		bool				check_result_in_token(char result);
 		void				add_rule_symbols(char result);
