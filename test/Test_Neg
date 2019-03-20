@@ -3,3 +3,5 @@ B + !C => A
 =C
 
 ?A
+
+#With C, A is false

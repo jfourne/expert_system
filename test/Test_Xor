@@ -2,6 +2,8 @@ B + C => A
 D ^ E => B
 B => C
 
-=E
+=DE
 
 ?A
+
+# With DE, A is false

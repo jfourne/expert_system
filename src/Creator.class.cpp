@@ -6,7 +6,7 @@
 /*   By: jfourne <jfourne@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/03/01 10:44:53 by jfourne           #+#    #+#             */
-/*   Updated: 2019/03/12 13:55:20 by jfourne          ###   ########.fr       */
+/*   Updated: 2019/03/20 10:16:16 by jfourne          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,6 @@
 
 Creator::Creator()
 {
-	// this->false_and = false;
 }
 
 void			Creator::free_tree(Tree *tree)
@@ -231,15 +230,6 @@ void					Creator::execute(void)
 	std::cout << "For query : " << query << std::endl;
 	res = check_all(query);
 	this->_result_query.insert(this->_result_query.end(), std::pair<char, bool>(query, res));
-	// if (check_all(query) == true && this->false_and == false)
-	// {
-	// 	// CHECK ADD TO FACT ?
-	// 	// this->add_fact(query);
-	// 	std::cout << query << " : is true" << std::endl;
-	// }
-	// else
-	// 	std::cout << query << " : is false" << std::endl;
-	// this->false_and = false;
 	this->_queries.erase(this->_queries.begin());
 	std::cout << std::endl;
 	this->execute();

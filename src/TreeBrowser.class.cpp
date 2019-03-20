@@ -6,7 +6,7 @@
 /*   By: jfourne <jfourne@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/03/04 11:28:37 by jfourne           #+#    #+#             */
-/*   Updated: 2019/03/13 10:16:09 by jfourne          ###   ########.fr       */
+/*   Updated: 2019/03/20 10:21:21 by jfourne          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,8 +84,6 @@ bool			TreeBrowser::check_conditions(bool left, bool right, Tree *tree)
 		<< " left is " << (left ? "true" : "false")
 		<< ", right is " << (right ? "true" : "false") 
 		<< " so the result is " << (ret ? "true" : "false") << std::endl;
-		// if (tree->_type == AND && ret == false)
-		// 	this->_creator->false_and = true;
 		return (ret);
 	}
 	else if (tree->_type == VAL)
@@ -105,6 +103,5 @@ bool			TreeBrowser::browse_tree(Tree *tree)
 		left = this->browse_tree(tree->_left);
 	if (tree->_right)
 		right = this->browse_tree(tree->_right);
-	// std::cout << "left  : " << left << " right : " << right << " value : " << tree->_value << std::endl;
 	return (this->check_conditions(left, right, tree));
 }

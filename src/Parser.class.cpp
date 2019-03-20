@@ -6,7 +6,7 @@
 /*   By: jfourne <jfourne@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/03/05 11:24:12 by jfourne           #+#    #+#             */
-/*   Updated: 2019/03/13 11:39:52 by jfourne          ###   ########.fr       */
+/*   Updated: 2019/03/20 10:14:54 by jfourne          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,7 +117,7 @@ void					Parser::parse_close_bracket(std::string &line, size_t i)
 		this->add_error("closing bracket right after an opening bracket");
 	while (it != this->_op.end())
 	{
-		if (line[i - 1] == it->second)
+		if (i > 0 && line[i - 1] == it->second)
 			this->add_error("closing bracket after an operator");
 		it++;
 	}	

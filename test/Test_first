@@ -2,5 +2,8 @@
 # wlkrwe 
 A | B + C => E # wlkjrwekjrw
 (F | G) + H  => E #wlkerjwe
-=
+=AC
 ?E
+
+# WIth AC, E is false
+# With FH, E is true

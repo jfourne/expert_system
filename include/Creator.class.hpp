@@ -6,7 +6,7 @@
 /*   By: jfourne <jfourne@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/03/01 10:43:37 by jfourne           #+#    #+#             */
-/*   Updated: 2019/03/11 15:39:12 by jfourne          ###   ########.fr       */
+/*   Updated: 2019/03/20 10:15:42 by jfourne          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,6 @@ class 				Creator
 		bool			check_all(char &query);
 		void			execute(void);
 		void			start_execute(void);
-		// bool						false_and;
 
 	private:
 		Tree						_tree;
