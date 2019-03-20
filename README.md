@@ -23,6 +23,6 @@ N => M
 With =DEIJOP, AFKP is true
 With =DEIKP, AFP is true, K is false
 
-+ is for AND
-| is for OR
-^ is for XOR
+'+' is for AND
+'|' is for OR
+'^' is for XOR
