@@ -7,14 +7,14 @@ By default all facts are false and can only be made true by the initial facts st
 by application of a rule.
 
 Example :
-B => A
-D + E => B
-G + H => F
-I + J => G
-G => H
-L + M => K
-O + P => L + N
-N => M
+ B => A
+ D + E => B
+ G + H => F
+ I + J => G
+ G => H
+ L + M => K
+ O + P => L + N
+ N => M
 
 =DEIJP
 
